@@ -2,6 +2,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  View as DefaultView,
   FlatList,
   Modal,
   StyleSheet,
@@ -71,7 +72,7 @@ export function ProductSearchModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.modalOverlay}>
+      <DefaultView style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor }]}>
           <View style={styles.header}>
             <Text style={styles.title}>Select Product</Text>
@@ -129,7 +130,7 @@ export function ProductSearchModal({
             />
           )}
         </View>
-      </View>
+      </DefaultView>
     </Modal>
   );
 }

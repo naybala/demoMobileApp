@@ -202,7 +202,7 @@ export default function DailyIncomeScreen() {
             ]}
           >
             <View style={styles.row}>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, backgroundColor: "transparent" }}>
                 <Text style={styles.itemLabel}>Name</Text>
                 <TouchableOpacity
                   style={[styles.pickerButton, { borderColor }]}
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 4,
     paddingHorizontal: 8,
-    height: 35,
+    height: 55,
     fontSize: 14,
   },
   submitButton: {
