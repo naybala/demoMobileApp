@@ -205,17 +205,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
       style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
     >
-      <View style={styles.viewHeader}>
-        <TouchableOpacity onPress={onBack}>
-          <FontAwesome name="arrow-left" size={20} color={textColor} />
-        </TouchableOpacity>
-        <Text style={[styles.viewTitle, { color: textColor }]}>
-          {editId ? "Edit Daily Income" : "Create Daily Income"}
-        </Text>
-        {fetching && (
-          <ActivityIndicator style={{ marginLeft: 10 }} size="small" />
-        )}
-      </View>
+      {/* Internal header removed in favor of Stack.Screen */}
 
       {voucherNo && (
         <Text style={[styles.voucherBadge, { color: textColor, borderColor }]}>

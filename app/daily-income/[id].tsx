@@ -1,25 +1,22 @@
-import { DailyIncomeList } from "@/components/DailyIncome/DailyIncomeList";
+import { DailyIncomeForm } from "@/components/DailyIncome/DailyIncomeForm";
 import { useThemeColor } from "@/components/Themed";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 
-export default function DailyIncomeScreen() {
+export default function DailyIncomeEditScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
   const token = useAuthStore((state) => state.token);
 
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
+  const cardColor = useThemeColor(
+    { light: "#f9f9f9", dark: "#2a2a2a" },
+    "background",
+  );
   const borderColor = useThemeColor({ light: "#eee", dark: "#333" }, "text");
-
-  const handleEdit = (id: number) => {
-    router.push(`/daily-income/${id}` as any);
-  };
-
-  const handleCreate = () => {
-    router.push("/daily-income/create" as any);
-  };
 
   if (!token) return null;
 
@@ -29,14 +26,19 @@ export default function DailyIncomeScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={100}
     >
+      <Stack.Screen
+        options={{ title: "Edit Daily Income", headerShown: true }}
+      />
       <View style={[styles.container, { backgroundColor }]}>
-        <DailyIncomeList
+        <DailyIncomeForm
           token={token}
           backgroundColor={backgroundColor}
           textColor={textColor}
+          cardColor={cardColor}
           borderColor={borderColor}
-          onCreatePress={handleCreate}
-          onEditPress={handleEdit}
+          editId={Number(id)}
+          onBack={() => router.back()}
+          onSuccess={() => router.back()}
         />
       </View>
     </KeyboardAvoidingView>
@@ -44,7 +46,5 @@ export default function DailyIncomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
 });
