@@ -1,4 +1,4 @@
-import { Text, View } from "@/components/Themed";
+import { Text, View, useThemeColor } from "@/components/Themed";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -26,6 +26,8 @@ interface OwnProduct {
 }
 
 export default function OwnProductsScreen() {
+  const cardBackground = useThemeColor({}, "background");
+  const borderColor = useThemeColor({ light: "#eee", dark: "#333" }, "text");
   const [products, setProducts] = useState<OwnProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -79,7 +81,10 @@ export default function OwnProductsScreen() {
 
   const renderItem = ({ item }: { item: OwnProduct }) => (
     <TouchableOpacity
-      style={styles.item}
+      style={[
+        styles.item,
+        { backgroundColor: cardBackground, borderColor: borderColor },
+      ]}
       onPress={() => router.push(`/own-product/${item.id}` as any)}
     >
       <Image
@@ -157,7 +162,6 @@ export default function OwnProductsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   centered: {
     flex: 1,
@@ -170,12 +174,10 @@ const styles = StyleSheet.create({
   },
   item: {
     flexDirection: "row",
-    backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 10,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#eee",
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -195,11 +197,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
   },
   category: {
     fontSize: 12,
-    color: "#888",
+    opacity: 0.6,
     marginBottom: 8,
   },
   priceRow: {
@@ -211,13 +212,12 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 10,
-    color: "#999",
+    opacity: 0.5,
     textTransform: "uppercase",
   },
   priceValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#444",
   },
   footerLoader: {
     paddingVertical: 20,

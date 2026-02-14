@@ -1,4 +1,4 @@
-import { Text, View } from "@/components/Themed";
+import { Text, View, useThemeColor } from "@/components/Themed";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet } from "react-native";
@@ -14,6 +14,8 @@ interface CategoryDetail {
 }
 
 export default function CategoryDetailScreen() {
+  const cardBackground = useThemeColor({}, "background");
+  const dividerColor = useThemeColor({ light: "#eee", dark: "#333" }, "text");
   const { id } = useLocalSearchParams();
   const [category, setCategory] = useState<CategoryDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,14 +55,14 @@ export default function CategoryDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: cardBackground }]}>
         <Text style={styles.label}>Name</Text>
         <Text style={styles.value}>{category.name}</Text>
 
         <Text style={styles.label}>Other Name</Text>
         <Text style={styles.value}>{category.name_other || "-"}</Text>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: dividerColor }]} />
 
         <Text style={styles.label}>Description</Text>
         <Text style={styles.description}>{category.description || "-"}</Text>
@@ -77,7 +79,6 @@ export default function CategoryDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   content: {
     padding: 20,
@@ -88,7 +89,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   card: {
-    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: "#888",
+    opacity: 0.5,
     textTransform: "uppercase",
     marginBottom: 4,
     marginTop: 15,
@@ -107,16 +107,14 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
   },
   description: {
     fontSize: 16,
-    color: "#555",
     lineHeight: 24,
+    opacity: 0.8,
   },
   divider: {
     height: 1,
-    backgroundColor: "#eee",
     marginVertical: 15,
   },
 });

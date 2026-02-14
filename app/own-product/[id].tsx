@@ -1,4 +1,4 @@
-import { Text, View } from "@/components/Themed";
+import { Text, View, useThemeColor } from "@/components/Themed";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -26,6 +26,8 @@ interface OwnProductDetail {
 }
 
 export default function OwnProductDetailScreen() {
+  const cardBackground = useThemeColor({}, "background");
+  const dividerColor = useThemeColor({ light: "#eee", dark: "#333" }, "text");
   const { id } = useLocalSearchParams();
   const [product, setProduct] = useState<OwnProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,13 +77,13 @@ export default function OwnProductDetailScreen() {
         style={styles.image}
         resizeMode="contain"
       />
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: cardBackground }]}>
         <Text style={styles.name}>{product.name}</Text>
         <Text style={styles.category}>
           {product.category} ({product.unit})
         </Text>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: dividerColor }]} />
 
         <View style={styles.infoRow}>
           <View style={styles.infoBox}>
@@ -111,7 +113,6 @@ export default function OwnProductDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   content: {
     padding: 15,
@@ -129,7 +130,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   card: {
-    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -141,16 +141,14 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
   },
   category: {
     fontSize: 16,
-    color: "#888",
+    opacity: 0.6,
     marginTop: 5,
   },
   divider: {
     height: 1,
-    backgroundColor: "#eee",
     marginVertical: 15,
   },
   infoRow: {
@@ -163,17 +161,16 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: "#999",
+    opacity: 0.5,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   value: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#444",
   },
   profitCard: {
-    backgroundColor: "#e8f5e9",
+    backgroundColor: "#1b5e20",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -181,16 +178,17 @@ const styles = StyleSheet.create({
   },
   profitLabel: {
     fontSize: 14,
-    color: "#2e7d32",
+    color: "#fff",
+    opacity: 0.8,
     marginBottom: 5,
   },
   profitValue: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#1b5e20",
+    color: "#fff",
   },
   date: {
     fontSize: 14,
-    color: "#666",
+    opacity: 0.6,
   },
 });

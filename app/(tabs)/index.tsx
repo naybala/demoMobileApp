@@ -1,4 +1,4 @@
-import { Text, View } from "@/components/Themed";
+import { Text, View, useThemeColor } from "@/components/Themed";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,6 +19,8 @@ interface Category {
 }
 
 export default function CategoriesScreen() {
+  const cardBackground = useThemeColor({}, "background");
+  const borderColor = useThemeColor({ light: "#eee", dark: "#333" }, "text");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -67,7 +69,10 @@ export default function CategoriesScreen() {
 
   const renderItem = ({ item }: { item: Category }) => (
     <TouchableOpacity
-      style={styles.item}
+      style={[
+        styles.item,
+        { backgroundColor: cardBackground, borderColor: borderColor },
+      ]}
       onPress={() => router.push(`/category/${item.id}` as any)}
     >
       <Text style={styles.itemName}>{item.name}</Text>
@@ -124,7 +129,6 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   centered: {
     flex: 1,
@@ -136,22 +140,19 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   item: {
-    backgroundColor: "#f9f9f9",
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#eee",
   },
   itemName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
   },
   itemDescription: {
     fontSize: 14,
-    color: "#666",
     marginTop: 4,
+    opacity: 0.7,
   },
   footerLoader: {
     paddingVertical: 20,

@@ -50,13 +50,17 @@ export default function TabLayout() {
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
         headerStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: Colors[colorScheme ?? "light"].background,
         },
-        headerTintColor: "#000",
+        headerTintColor: Colors[colorScheme ?? "light"].text,
         headerRight: () => (
           <View style={{ flexDirection: "row", marginRight: 15 }}>
             <TouchableOpacity onPress={handleLogout}>
-              <FontAwesome name="sign-out" size={22} color="#000" />
+              <FontAwesome
+                name="sign-out"
+                size={22}
+                color={Colors[colorScheme ?? "light"].text}
+              />
             </TouchableOpacity>
           </View>
         ),
