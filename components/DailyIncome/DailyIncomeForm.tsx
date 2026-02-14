@@ -1,5 +1,10 @@
-import { getDailyIncomeDetail } from "@/src/services/dailyIncomeService";
+import {
+  getDailyIncomeDetail,
+  storeDailyIncome,
+  updateDailyIncome,
+} from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -35,7 +40,8 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
   onBack,
   onSuccess,
 }) => {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [voucherNo, setVoucherNo] = useState<string | null>(null);
   const [items, setItems] = useState<IncomeItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +62,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     try {
       const response = await getDailyIncomeDetail(token, editId!);
       const record = response.data;
-      setDate(record.date);
+      setDate(new Date(record.date));
       setVoucherNo(record.voucher_no);
 
       const mappedItems: IncomeItem[] = record.items.map((item: any) => {
@@ -159,7 +165,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     setLoading(true);
     try {
       const payload = {
-        date,
+        date: date.toISOString().split("T")[0],
         items: items.map((i) => ({
           product_id: i.product_id,
           amount: i.amount,
@@ -170,13 +176,13 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
       };
       console.log(payload);
 
-      //   if (editId) {
-      //     await updateDailyIncome(token, editId, payload);
-      //     Alert.alert("Success", "Daily income updated successfully!");
-      //   } else {
-      //     await storeDailyIncome(token, payload);
-      //     Alert.alert("Success", "Daily income saved successfully!");
-      //   }
+      if (editId) {
+        await updateDailyIncome(token, editId, payload);
+        Alert.alert("Success", "Daily income updated successfully!");
+      } else {
+        await storeDailyIncome(token, payload);
+        Alert.alert("Success", "Daily income saved successfully!");
+      }
       onSuccess();
     } catch (error) {
       Alert.alert("Error", "Failed to save.");
@@ -219,21 +225,35 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
 
       <View style={styles.dateContainer}>
         <Text style={[styles.label, { color: textColor }]}>Date</Text>
-        <View style={[styles.dateInput, { borderColor }]}>
+        <TouchableOpacity
+          style={[styles.dateInput, { borderColor }]}
+          onPress={() => setShowDatePicker(true)}
+        >
           <FontAwesome
             name="calendar"
             size={18}
             color="#888"
             style={{ marginRight: 10 }}
           />
-          <TextInput
-            style={{ flex: 1, color: textColor }}
-            value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
-          />
-        </View>
+          <Text style={{ flex: 1, color: textColor }}>
+            {date.toISOString().split("T")[0]}
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={(_, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setDate(selectedDate);
+            }
+          }}
+        />
+      )}
 
       <TouchableOpacity style={styles.addButton} onPress={addMoreProduct}>
         <FontAwesome
@@ -413,6 +433,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     textTransform: "uppercase",
     marginBottom: 4,
+    color: "#6d6868ff",
   },
   pickerButton: {
     flexDirection: "row",
@@ -430,8 +451,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    height: 45,
+    height: 50,
     fontSize: 14,
+    backgroundColor: "transparent",
   },
   smallDisplay: {
     borderWidth: 1,

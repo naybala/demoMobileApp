@@ -1,5 +1,6 @@
 import { getDailyIncomes } from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -39,27 +40,35 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
+  // date picker visibility
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
+
   useEffect(() => {
     fetchRecords(1);
   }, []);
 
-  const fetchRecords = async (pageNumber: number, isRefresh = false) => {
+  const fetchRecords = async (
+    pageNumber: number,
+    isRefresh = false,
+    searchOverride?: string,
+    fromDateOverride?: string,
+    toDateOverride?: string,
+  ) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
     try {
       const response = await getDailyIncomes(token, {
         page: pageNumber,
-        search,
-        from_date: fromDate,
-        to_date: toDate,
+        search: searchOverride !== undefined ? searchOverride : search,
+        from_date: fromDateOverride !== undefined ? fromDateOverride : fromDate,
+        to_date: toDateOverride !== undefined ? toDateOverride : toDate,
       });
 
-      if (pageNumber === 1) {
-        setRecords(response.data);
-      } else {
-        setRecords((prev) => [...prev, ...response.data]);
-      }
+      if (pageNumber === 1) setRecords(response.data);
+      else setRecords((prev) => [...prev, ...response.data]);
+
       setLastPage(response.meta.last_page);
       setPage(pageNumber);
     } catch (error) {
@@ -68,14 +77,6 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  const formatCurrency = (value: string) => {
-    const num = parseFloat(value.replace(/,/g, ""));
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
   };
 
   const renderItem = ({
@@ -95,6 +96,7 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
             {!hideVoucher ? item.date : ""}
           </Text>
         </View>
+
         <View style={styles.recordColLarge}>
           <Text style={styles.recordTextSecondary}>
             {!hideVoucher ? item.voucher_no : ""}
@@ -103,12 +105,14 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
             {item.own_product}
           </Text>
         </View>
+
         <View style={styles.recordColSmall}>
           <Text style={[styles.recordTextPrimary, { color: textColor }]}>
             {item.amount}
           </Text>
           <Text style={styles.recordTextSecondary}>{item.unit}</Text>
         </View>
+
         <TouchableOpacity
           style={styles.editBtn}
           onPress={() => onEditPress(item.id)}
@@ -121,6 +125,7 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
+      {/* HEADER */}
       <View style={styles.listHeader}>
         <View style={styles.toolbar}>
           <View style={[styles.searchBox, { borderColor }]}>
@@ -140,39 +145,69 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* FILTER BAR */}
         <View style={styles.filterBar}>
-          <TextInput
-            style={[styles.filterInput, { borderColor, color: textColor }]}
-            placeholder="From: YYYY-MM-DD"
-            placeholderTextColor="#888"
-            value={fromDate}
-            onChangeText={setFromDate}
-          />
-          <TextInput
-            style={[styles.filterInput, { borderColor, color: textColor }]}
-            placeholder="To: YYYY-MM-DD"
-            placeholderTextColor="#888"
-            value={toDate}
-            onChangeText={setToDate}
-          />
+          {/* FROM DATE */}
+          <TouchableOpacity
+            style={[
+              styles.filterInput,
+              { borderColor, justifyContent: "center" },
+            ]}
+            onPress={() => setShowFromPicker(true)}
+          >
+            <Text
+              style={{ color: fromDate ? textColor : "#888", fontSize: 12 }}
+            >
+              {fromDate || "From: YYYY-MM-DD"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* TO DATE */}
+          <TouchableOpacity
+            style={[
+              styles.filterInput,
+              { borderColor, justifyContent: "center" },
+            ]}
+            onPress={() => setShowToPicker(true)}
+          >
+            <Text style={{ color: toDate ? textColor : "#888", fontSize: 12 }}>
+              {toDate || "To: YYYY-MM-DD"}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.filterBtn}
             onPress={() => fetchRecords(1)}
           >
             <Text style={styles.filterBtnText}>Filter</Text>
           </TouchableOpacity>
+
+          {(fromDate !== "" || toDate !== "") && (
+            <TouchableOpacity
+              style={[styles.filterBtn, { backgroundColor: "#dc3545" }]}
+              onPress={() => {
+                setFromDate("");
+                setToDate("");
+                fetchRecords(1, false, undefined, "", "");
+              }}
+            >
+              <FontAwesome name="times" size={12} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
 
+        {/* TABLE HEADER */}
         <View style={[styles.tableHeader, { borderBottomColor: borderColor }]}>
           <Text style={[styles.headerCol, styles.recordColSmall]}>Date</Text>
           <Text style={[styles.headerCol, styles.recordColLarge]}>
             Product/Voucher
           </Text>
           <Text style={[styles.headerCol, styles.recordColSmall]}>Qty</Text>
-          <Text style={[styles.headerCol, { width: 30 }]}></Text>
+          <Text style={[styles.headerCol, { width: 30 }]} />
         </View>
       </View>
 
+      {/* LIST */}
       <FlatList
         data={records}
         renderItem={renderItem}
@@ -190,9 +225,7 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
           />
         }
         ListFooterComponent={
-          loading ? (
-            <ActivityIndicator style={{ padding: 20 }} color="#007AFF" />
-          ) : null
+          loading ? <ActivityIndicator style={{ padding: 20 }} /> : null
         }
         ListEmptyComponent={
           !loading ? (
@@ -201,6 +234,36 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
         }
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      {/* FROM DATE PICKER */}
+      {showFromPicker && (
+        <DateTimePicker
+          value={fromDate ? new Date(fromDate) : new Date()}
+          mode="date"
+          display="default"
+          onChange={(_, selectedDate) => {
+            setShowFromPicker(false);
+            if (selectedDate) {
+              setFromDate(selectedDate.toISOString().split("T")[0]);
+            }
+          }}
+        />
+      )}
+
+      {/* TO DATE PICKER */}
+      {showToPicker && (
+        <DateTimePicker
+          value={toDate ? new Date(toDate) : new Date()}
+          mode="date"
+          display="default"
+          onChange={(_, selectedDate) => {
+            setShowToPicker(false);
+            if (selectedDate) {
+              setToDate(selectedDate.toISOString().split("T")[0]);
+            }
+          }}
+        />
+      )}
     </View>
   );
 };
@@ -229,36 +292,42 @@ const styles = StyleSheet.create({
   },
   createBtnText: { color: "#fff", fontWeight: "600" },
   filterBar: { flexDirection: "row", gap: 8, marginBottom: 15 },
+
   filterInput: {
     flex: 1,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 35,
-    fontSize: 12,
   },
+
   filterBtn: {
     backgroundColor: "#6c757d",
     borderRadius: 8,
     paddingHorizontal: 12,
     justifyContent: "center",
   },
+
   filterBtnText: { color: "#fff", fontSize: 12, fontWeight: "600" },
+
   tableHeader: {
     flexDirection: "row",
     paddingVertical: 10,
     borderBottomWidth: 1,
   },
+
   headerCol: { fontSize: 12, fontWeight: "bold", opacity: 0.6, color: "#888" },
+
   recordRow: {
     flexDirection: "row",
     paddingVertical: 12,
     borderBottomWidth: 1,
     paddingHorizontal: 15,
   },
+
   recordColSmall: { width: 80 },
-  recordColMedium: { width: 90, alignItems: "flex-end" },
   recordColLarge: { flex: 1, paddingRight: 10 },
+
   recordTextPrimary: { fontSize: 12, fontWeight: "500" },
   recordTextSecondary: {
     fontSize: 11,
@@ -266,11 +335,13 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     color: "#888",
   },
+
   editBtn: {
     width: 30,
     height: 30,
     justifyContent: "center",
     alignItems: "center",
   },
+
   emptyText: { textAlign: "center", marginTop: 40, opacity: 0.5 },
 });
