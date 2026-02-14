@@ -19,6 +19,7 @@ interface DailyIncomeListProps {
   textColor: string;
   backgroundColor: string;
   onCreatePress: () => void;
+  onEditPress: (id: number) => void;
 }
 
 export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
@@ -27,6 +28,7 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
   textColor,
   backgroundColor,
   onCreatePress,
+  onEditPress,
 }) => {
   const [records, setRecords] = useState<DailyIncomeRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,6 +109,12 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
           </Text>
           <Text style={styles.recordTextSecondary}>{item.unit}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() => onEditPress(item.id)}
+        >
+          <FontAwesome name="edit" size={16} color="#007AFF" />
+        </TouchableOpacity>
       </View>
     );
   };
@@ -161,6 +169,7 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
             Product/Voucher
           </Text>
           <Text style={[styles.headerCol, styles.recordColSmall]}>Qty</Text>
+          <Text style={[styles.headerCol, { width: 30 }]}></Text>
         </View>
       </View>
 
@@ -256,6 +265,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginBottom: 2,
     color: "#888",
+  },
+  editBtn: {
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyText: { textAlign: "center", marginTop: 40, opacity: 0.5 },
 });

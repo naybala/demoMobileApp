@@ -15,6 +15,20 @@ export const getDailyIncomes = async (token, params = {}) => {
   return response.data.data;
 };
 
+export const getDailyIncomeDetail = async (token, id) => {
+  const response = await axios.get(`${API_URL}/daily-incomes/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updateDailyIncome = async (token, id, data) => {
+  const response = await axios.put(`${API_URL}/daily-incomes/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
 export const storeDailyIncome = async (token, data) => {
   const response = await axios.post(`${API_URL}/daily-incomes`, data, {
     headers: { Authorization: `Bearer ${token}` },

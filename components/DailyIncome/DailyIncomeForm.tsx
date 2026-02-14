@@ -1,6 +1,6 @@
-import { storeDailyIncome } from "@/src/services/dailyIncomeService";
+import { getDailyIncomeDetail } from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +20,7 @@ interface DailyIncomeFormProps {
   textColor: string;
   cardColor: string;
   borderColor: string;
+  editId?: number | null;
   onBack: () => void;
   onSuccess: () => void;
 }
@@ -30,14 +31,62 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
   textColor,
   cardColor,
   borderColor,
+  editId,
   onBack,
   onSuccess,
 }) => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [voucherNo, setVoucherNo] = useState<string | null>(null);
   const [items, setItems] = useState<IncomeItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (editId) {
+      loadDetail();
+    } else {
+      setVoucherNo(null);
+    }
+  }, [editId]);
+
+  const loadDetail = async () => {
+    setFetching(true);
+    try {
+      const response = await getDailyIncomeDetail(token, editId!);
+      const record = response.data;
+      setDate(record.date);
+      setVoucherNo(record.voucher_no);
+
+      const mappedItems: IncomeItem[] = record.items.map((item: any) => {
+        const price = parseFloat(item.price.replace(/,/g, ""));
+        const investment = parseFloat(item.investment.replace(/,/g, ""));
+        const profit = parseFloat(item.profit.replace(/,/g, ""));
+        const amount = parseFloat(item.amount);
+
+        return {
+          id: Math.random().toString(36).substring(7),
+          product_id: item.own_product_id,
+          name: item.own_product,
+          amount: amount,
+          unit: item.unit,
+          price: price,
+          investment: investment,
+          profit: profit,
+          basePrice: price / amount,
+          baseInvestment: investment / amount,
+          baseProfit: profit / amount,
+        };
+      });
+      setItems(mappedItems);
+    } catch (error) {
+      Alert.alert("Error", "Failed to load details.");
+      onBack();
+    } finally {
+      setFetching(false);
+    }
+  };
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString(undefined, {
@@ -119,8 +168,15 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           profit: i.profit,
         })),
       };
-      await storeDailyIncome(token, payload);
-      Alert.alert("Success", "Daily income saved successfully!");
+      console.log(payload);
+
+      //   if (editId) {
+      //     await updateDailyIncome(token, editId, payload);
+      //     Alert.alert("Success", "Daily income updated successfully!");
+      //   } else {
+      //     await storeDailyIncome(token, payload);
+      //     Alert.alert("Success", "Daily income saved successfully!");
+      //   }
       onSuccess();
     } catch (error) {
       Alert.alert("Error", "Failed to save.");
@@ -148,9 +204,18 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           <FontAwesome name="arrow-left" size={20} color={textColor} />
         </TouchableOpacity>
         <Text style={[styles.viewTitle, { color: textColor }]}>
-          Create Daily Income
+          {editId ? "Edit Daily Income" : "Create Daily Income"}
         </Text>
+        {fetching && (
+          <ActivityIndicator style={{ marginLeft: 10 }} size="small" />
+        )}
       </View>
+
+      {voucherNo && (
+        <Text style={[styles.voucherBadge, { color: textColor, borderColor }]}>
+          Voucher: {voucherNo}
+        </Text>
+      )}
 
       <View style={styles.dateContainer}>
         <Text style={[styles.label, { color: textColor }]}>Date</Text>
@@ -287,12 +352,14 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
         <TouchableOpacity
           style={[styles.submitButton, loading && { opacity: 0.7 }]}
           onPress={handleSubmit}
-          disabled={loading}
+          disabled={loading || fetching}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>Submit</Text>
+            <Text style={styles.submitButtonText}>
+              {editId ? "Update" : "Submit"}
+            </Text>
           )}
         </TouchableOpacity>
       )}
@@ -309,8 +376,15 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 40 },
-  viewHeader: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  viewHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   viewTitle: { fontSize: 20, fontWeight: "bold", marginLeft: 15 },
+  voucherBadge: {
+    fontSize: 13,
+    fontWeight: "600",
+    opacity: 0.6,
+    marginBottom: 15,
+    paddingHorizontal: 4,
+  },
   dateContainer: { marginBottom: 20 },
   label: { fontSize: 16, marginBottom: 8, opacity: 0.8 },
   dateInput: {
