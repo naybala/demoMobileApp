@@ -7,7 +7,8 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
@@ -57,8 +58,15 @@ function RootLayoutNav() {
   const token = useAuthStore((state) => state.token);
   const segments = useSegments();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const inAuthGroup = segments[0] === "(tabs)";
 
     if (!token && inAuthGroup) {
@@ -68,7 +76,7 @@ function RootLayoutNav() {
       // Redirect to the home page if authenticated
       router.replace("/(tabs)");
     }
-  }, [token, segments]);
+  }, [token, segments, isMounted]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
