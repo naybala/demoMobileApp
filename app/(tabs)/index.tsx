@@ -1,6 +1,14 @@
 import { Text, View } from "@/components/Themed";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { getCategories } from "../../src/services/categoryService";
 import { useAuthStore } from "../../src/store/useAuthStore";
 
@@ -14,9 +22,11 @@ export default function CategoriesScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const token = useAuthStore((state) => state.token);
+  const router = useRouter();
 
   useEffect(() => {
     fetchCategories(1);
@@ -40,7 +50,13 @@ export default function CategoriesScreen() {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchCategories(1);
   };
 
   const handleLoadMore = () => {
@@ -50,10 +66,13 @@ export default function CategoriesScreen() {
   };
 
   const renderItem = ({ item }: { item: Category }) => (
-    <View style={styles.item}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => router.push(`/category/${item.id}` as any)}
+    >
       <Text style={styles.itemName}>{item.name}</Text>
       <Text style={styles.itemDescription}>{item.description}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderFooter = () => {
@@ -83,6 +102,13 @@ export default function CategoriesScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["#007AFF"]}
+          />
+        }
         ListEmptyComponent={
           !loading ? (
             <View style={styles.centered}>

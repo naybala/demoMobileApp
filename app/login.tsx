@@ -32,6 +32,8 @@ export default function LoginScreen() {
       const response = await login(email, password);
 
       if (response.status === "success") {
+        console.log(response.data);
+
         setAuth(response.data.user_info, response.data.token);
         router.replace("/(tabs)");
       } else {

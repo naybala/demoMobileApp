@@ -11,3 +11,21 @@ export const login = async (email, password) => {
     throw error;
   }
 };
+
+export const logout = async (token, id) => {
+  console.log(token, id);
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/logout`,
+      { id: id },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Logout error:", error.response?.data || error.message);
+    throw error;
+  }
+};

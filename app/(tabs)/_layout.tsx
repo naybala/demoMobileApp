@@ -5,6 +5,9 @@ import React from "react";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { logout as apiLogout } from "@/src/services/authService";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { Alert, TouchableOpacity, View } from "react-native";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -16,6 +19,28 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { token, user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (token && user) {
+              await apiLogout(token, user.id);
+            }
+          } catch (error) {
+            console.error("Logout failed", error);
+          } finally {
+            logout();
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <Tabs
@@ -24,6 +49,17 @@ export default function TabLayout() {
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
+        headerStyle: {
+          backgroundColor: "#fff",
+        },
+        headerTintColor: "#000",
+        headerRight: () => (
+          <View style={{ flexDirection: "row", marginRight: 15 }}>
+            <TouchableOpacity onPress={handleLogout}>
+              <FontAwesome name="sign-out" size={22} color="#000" />
+            </TouchableOpacity>
+          </View>
+        ),
       }}
     >
       <Tabs.Screen

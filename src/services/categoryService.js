@@ -10,3 +10,10 @@ export const getCategories = async (token, page = 1) => {
 
   return response.data.data;
 };
+
+export const getCategoryDetail = async (token, id) => {
+  const response = await axios.get(`${API_URL}/categories/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

@@ -1,11 +1,14 @@
 import { Text, View } from "@/components/Themed";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 import { getOwnProducts } from "../../src/services/ownProductService";
 import { useAuthStore } from "../../src/store/useAuthStore";
@@ -26,9 +29,11 @@ export default function OwnProductsScreen() {
   const [products, setProducts] = useState<OwnProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const token = useAuthStore((state) => state.token);
+  const router = useRouter();
 
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const BASE_DOMAIN = API_URL?.includes("/api")
@@ -57,7 +62,13 @@ export default function OwnProductsScreen() {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchProducts(1);
   };
 
   const handleLoadMore = () => {
@@ -67,7 +78,10 @@ export default function OwnProductsScreen() {
   };
 
   const renderItem = ({ item }: { item: OwnProduct }) => (
-    <View style={styles.item}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => router.push(`/own-product/${item.id}` as any)}
+    >
       <Image
         source={{ uri: `${BASE_DOMAIN}${item.image}` }}
         style={styles.image}
@@ -91,7 +105,7 @@ export default function OwnProductsScreen() {
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderFooter = () => {
@@ -121,6 +135,13 @@ export default function OwnProductsScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["#007AFF"]}
+          />
+        }
         ListEmptyComponent={
           !loading ? (
             <View style={styles.centered}>
