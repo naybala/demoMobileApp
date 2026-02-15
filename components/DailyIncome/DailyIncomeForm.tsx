@@ -44,6 +44,8 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [voucherNo, setVoucherNo] = useState<string | null>(null);
   const [items, setItems] = useState<IncomeItem[]>([]);
+  const [isInstant, setIsInstant] = useState(false);
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -64,6 +66,8 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
       const record = response.data;
       setDate(new Date(record.date));
       setVoucherNo(record.voucher_no);
+      setIsInstant(record.is_instant === 1 || record.is_instant === true);
+      setNote(record.note || "");
 
       const mappedItems: IncomeItem[] = record.items.map((item: any) => {
         const price = parseFloat(item.price.replace(/,/g, ""));
@@ -166,6 +170,8 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     try {
       const payload = {
         date: date.toISOString().split("T")[0],
+        is_instant: isInstant ? 1 : 0,
+        note,
         items: items.map((i) => ({
           product_id: i.product_id,
           amount: i.amount,
@@ -174,7 +180,6 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           profit: i.profit,
         })),
       };
-      console.log(payload);
 
       if (editId) {
         await updateDailyIncome(token, editId, payload);
@@ -349,6 +354,14 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           </View>
           <View style={styles.totalRow}>
             <Text style={[styles.totalLabel, { color: textColor }]}>
+              Total Investment
+            </Text>
+            <Text style={[styles.totalPrice, { color: textColor }]}>
+              {formatCurrency(totals.investment)}
+            </Text>
+          </View>
+          <View style={styles.totalRow}>
+            <Text style={[styles.totalLabel, { color: textColor }]}>
               Total Profit
             </Text>
             <Text style={styles.totalProfit}>
@@ -357,6 +370,37 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           </View>
         </View>
       )}
+
+      <TouchableOpacity
+        style={styles.checkboxContainer}
+        onPress={() => setIsInstant(!isInstant)}
+      >
+        <View
+          style={[
+            styles.checkbox,
+            { borderColor },
+            isInstant && styles.checkboxActive,
+          ]}
+        >
+          {isInstant && <FontAwesome name="check" size={12} color="#fff" />}
+        </View>
+        <Text style={[styles.checkboxLabel, { color: textColor }]}>
+          Is Instant
+        </Text>
+      </TouchableOpacity>
+
+      <View style={styles.noteContainer}>
+        <Text style={[styles.label, { color: textColor }]}>Note</Text>
+        <TextInput
+          style={[styles.noteInput, { borderColor, color: textColor }]}
+          multiline
+          numberOfLines={4}
+          placeholder="Enter note here..."
+          placeholderTextColor="#888"
+          value={note}
+          onChangeText={setNote}
+        />
+      </View>
 
       {items.length > 0 && (
         <TouchableOpacity
@@ -477,4 +521,37 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 14, opacity: 0.7 },
   totalPrice: { fontSize: 16, fontWeight: "600" },
   totalProfit: { fontSize: 18, fontWeight: "bold", color: "#28a745" },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderRadius: 4,
+    marginRight: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxActive: {
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  noteContainer: {
+    marginBottom: 20,
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
 });
