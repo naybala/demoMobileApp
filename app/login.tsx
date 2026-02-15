@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -32,8 +33,6 @@ export default function LoginScreen() {
       const response = await login(email, password);
 
       if (response.status === "success") {
-        console.log(response.data);
-
         setAuth(response.data.user_info, response.data.token);
         router.replace("/(tabs)");
       } else {
@@ -51,6 +50,11 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../assets/images/logo.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
@@ -100,6 +104,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
     backgroundColor: "#ada1a1ff",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+    borderRadius: 10,
   },
   title: {
     fontSize: 24,
