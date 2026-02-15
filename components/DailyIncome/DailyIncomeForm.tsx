@@ -205,6 +205,17 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     { price: 0, investment: 0, profit: 0 },
   );
 
+  if (fetching) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor }]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={[styles.loadingText, { color: textColor }]}>
+          Loading details...
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor }]}
@@ -553,5 +564,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     minHeight: 100,
     textAlignVertical: "top",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 15,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "500",
+    opacity: 0.7,
   },
 });
