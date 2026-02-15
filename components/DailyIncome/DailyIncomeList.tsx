@@ -1,7 +1,8 @@
 import { getDailyIncomes } from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -44,9 +45,11 @@ export const DailyIncomeList: React.FC<DailyIncomeListProps> = ({
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
-  useEffect(() => {
-    fetchRecords(1);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchRecords(1);
+    }, []),
+  );
 
   const fetchRecords = async (
     pageNumber: number,

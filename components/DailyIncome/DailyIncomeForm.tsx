@@ -223,6 +223,8 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     <ScrollView
       style={[styles.container, { backgroundColor }]}
       contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
     >
       {/* Internal header removed in favor of Stack.Screen */}
 
@@ -437,6 +439,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
         onClose={() => setIsModalVisible(false)}
         onSelect={handleProductSelect}
       />
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 };

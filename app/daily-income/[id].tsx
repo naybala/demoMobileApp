@@ -23,8 +23,8 @@ export default function DailyIncomeEditScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={100}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
     >
       <Stack.Screen
         options={{ title: "Edit Daily Income", headerShown: true }}
