@@ -4,6 +4,7 @@ export interface IncomeItem {
   name: string;
   amount: number;
   unit: string;
+  unit_id: number | null;
   price: number;
   investment: number;
   profit: number;

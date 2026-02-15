@@ -17,6 +17,7 @@ interface Product {
   id: number;
   name: string;
   unit: string;
+  unit_id: number;
   price: string;
   investment: string;
   profit: string;

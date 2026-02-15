@@ -1,8 +1,4 @@
-import {
-  getDailyIncomeDetail,
-  storeDailyIncome,
-  updateDailyIncome,
-} from "@/src/services/dailyIncomeService";
+import { getDailyIncomeDetail } from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
@@ -81,6 +77,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           name: item.own_product,
           amount: amount,
           unit: item.unit,
+          unit_id: item.unit_id,
           price: price,
           investment: investment,
           profit: profit,
@@ -114,6 +111,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
         name: "Select an option",
         amount: 1,
         unit: "",
+        unit_id: null,
         price: 0,
         investment: 0,
         profit: 0,
@@ -139,6 +137,7 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
     item.product_id = product.id;
     item.name = product.name;
     item.unit = product.unit;
+    item.unit_id = product.unit_id;
     item.basePrice = price;
     item.baseInvestment = investment;
     item.baseProfit = profit;
@@ -178,17 +177,19 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           price: i.price,
           investment: i.investment,
           profit: i.profit,
+          unit_id: i.unit_id,
         })),
       };
+      console.log(payload);
 
-      if (editId) {
-        await updateDailyIncome(token, editId, payload);
-        Alert.alert("Success", "Daily income updated successfully!");
-      } else {
-        await storeDailyIncome(token, payload);
-        Alert.alert("Success", "Daily income saved successfully!");
-      }
-      onSuccess();
+      // if (editId) {
+      //   await updateDailyIncome(token, editId, payload);
+      //   Alert.alert("Success", "Daily income updated successfully!");
+      // } else {
+      //   await storeDailyIncome(token, payload);
+      //   Alert.alert("Success", "Daily income saved successfully!");
+      // }
+      // onSuccess();
     } catch (error) {
       Alert.alert("Error", "Failed to save.");
     } finally {
