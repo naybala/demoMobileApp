@@ -1,4 +1,8 @@
-import { getDailyIncomeDetail } from "@/src/services/dailyIncomeService";
+import {
+  getDailyIncomeDetail,
+  storeDailyIncome,
+  updateDailyIncome,
+} from "@/src/services/dailyIncomeService";
 import { FontAwesome } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
@@ -180,16 +184,14 @@ export const DailyIncomeForm: React.FC<DailyIncomeFormProps> = ({
           unit_id: i.unit_id,
         })),
       };
-      console.log(payload);
-
-      // if (editId) {
-      //   await updateDailyIncome(token, editId, payload);
-      //   Alert.alert("Success", "Daily income updated successfully!");
-      // } else {
-      //   await storeDailyIncome(token, payload);
-      //   Alert.alert("Success", "Daily income saved successfully!");
-      // }
-      // onSuccess();
+      if (editId) {
+        await updateDailyIncome(token, editId, payload);
+        Alert.alert("Success", "Daily income updated successfully!");
+      } else {
+        await storeDailyIncome(token, payload);
+        Alert.alert("Success", "Daily income saved successfully!");
+      }
+      onSuccess();
     } catch (error) {
       Alert.alert("Error", "Failed to save.");
     } finally {
